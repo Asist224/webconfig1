@@ -9059,6 +9059,61 @@ async function exportCurrentConfig() {
     showSaveIndicator('saving', t('save.preparing_export_current'));
 
     try {
+        // ✅ ИСПРАВЛЕНИЕ: Автоматически сохраняем текущие несохраненные изменения перед экспортом
+        console.log('💾 Проверка несохраненных изменений...');
+
+        // Проверяем, открыта ли страница глобальных настроек
+        const globalPage = document.getElementById('global-settings');
+        if (globalPage && !globalPage.classList.contains('hidden') && isDirty) {
+            console.log('💾 Сохранение глобальных настроек перед экспортом...');
+            const fieldsToUpdate = collectGlobalSettingsFields();
+            if (window.GlobalConfigSettings) {
+                Object.assign(window.GlobalConfigSettings, fieldsToUpdate);
+                try {
+                    localStorage.setItem('GlobalConfigSettings', JSON.stringify(window.GlobalConfigSettings));
+                    console.log('✅ Глобальные настройки автоматически сохранены для экспорта');
+                } catch (e) {
+                    console.error('❌ Ошибка автосохранения глобальных настроек:', e);
+                }
+            }
+        }
+
+        // Проверяем, открыта ли страница редактирования конфигурации
+        const configPage = document.getElementById('config-editor');
+        if (configPage && !configPage.classList.contains('hidden') && currentConfig && isDirty) {
+            console.log(`💾 Сохранение конфигурации ${currentConfig} перед экспортом...`);
+            try {
+                const configData = collectConfigData();
+
+                // Сохраняем в window
+                if (window[currentConfig]) {
+                    Object.assign(window[currentConfig], configData);
+                }
+                if (window.ChatConfigs) {
+                    const shortName = currentConfig.replace('Config', '');
+                    window.ChatConfigs[shortName] = configData;
+                }
+
+                // Сохраняем в localStorage
+                localStorage.setItem(currentConfig, JSON.stringify(configData));
+                console.log(`✅ Конфигурация ${currentConfig} автоматически сохранена для экспорта`);
+
+                // Обновляем order в GlobalConfigSettings если нужно
+                if (window.GlobalConfigSettings && window.GlobalConfigSettings.availableConfigs && configData.switcherSettings?.order) {
+                    if (!window.GlobalConfigSettings.availableConfigs[currentConfig]) {
+                        window.GlobalConfigSettings.availableConfigs[currentConfig] = { enabled: true };
+                    }
+                    window.GlobalConfigSettings.availableConfigs[currentConfig].order = configData.switcherSettings.order;
+                    localStorage.setItem('GlobalConfigSettings', JSON.stringify(window.GlobalConfigSettings));
+                }
+            } catch (e) {
+                console.error('❌ Ошибка автосохранения конфигурации:', e);
+            }
+        }
+
+        // Сбрасываем флаг несохраненных изменений
+        isDirty = false;
+
         // 1. Загружаем полный файл webchat-config.js
         console.log('📥 Загрузка оригинального файла webchat-config.js...');
         const response = await fetch('webchat-config.js');
