@@ -4048,21 +4048,14 @@
                     </div>
 
                     <div class="d-flex gap-3" style="flex-wrap: wrap;">
-                        <button class="btn btn-primary" onclick="exportConfig()">
-                            <span data-i18n="export.btn_download">📥 Скачать webchat-config.js</span>
-                        </button>
                         <button class="btn btn-success" onclick="exportCurrentConfig()" style="background: #10b981; border-color: #10b981;">
-                            <span data-i18n="export.btn_export_full">📤 Экспорт полного файла с текущими настройками</span>
-                        </button>
-                        <button class="btn btn-secondary" onclick="copyConfigToClipboard()">
-                            <span data-i18n="export.btn_copy">📋 Копировать в буфер</span>
+                            <span data-i18n="export.btn_export_full">📤 Экспортировать конфигурацию</span>
                         </button>
                     </div>
                     <div class="info-box mt-3">
                         <div class="info-box-icon">💡</div>
                         <div class="info-box-content" data-i18n="export.export_info">
-                            <strong>Скачать webchat-config.js</strong> - скачивает сохраненную конфигурацию с сервера как есть.<br>
-                            <strong>Экспорт полного файла с текущими настройками</strong> - создает полный рабочий файл webchat-config.js со всеми функциями, переводами и кодом, но с текущими настройками из формы (без сохранения на сервере). Идеально для создания индивидуальных конфигураций.
+                            <strong>Экспортировать конфигурацию</strong> - скачивает файл webchat-config.js с вашими настройками из браузера в формате .js. Все данные хранятся локально в вашем браузере.
                         </div>
                     </div>
                 </div>
@@ -4790,10 +4783,8 @@
                 'export.all_configs': 'Все конфигурации',
                 'export.interface_texts': 'Базовые тексты интерфейса',
                 'export.minify_code': 'Минифицировать код',
-                'export.btn_download': '📥 Скачать webchat-config.js',
-                'export.btn_export_full': '📤 Экспорт полного файла с текущими настройками',
-                'export.btn_copy': '📋 Копировать в буфер',
-                'export.export_info': '<strong>Скачать webchat-config.js</strong> - скачивает сохраненную конфигурацию с сервера как есть.<br><strong>Экспорт полного файла с текущими настройками</strong> - создает полный рабочий файл webchat-config.js со всеми функциями, переводами и кодом, но с текущими настройками из формы (без сохранения на сервере). Идеально для создания индивидуальных конфигураций.',
+                'export.btn_export_full': '📤 Экспортировать конфигурацию',
+                'export.export_info': '<strong>Экспортировать конфигурацию</strong> - скачивает файл webchat-config.js с вашими настройками из браузера в формате .js. Все данные хранятся локально в вашем браузере.',
                 'export.import_title': 'Импорт конфигурации',
                 'export.import_desc': 'Загрузите существующий файл конфигурации для редактирования',
                 'export.import_warning': 'Импорт заменит все текущие настройки. Рекомендуется сначала создать резервную копию.',
@@ -5524,10 +5515,8 @@
                 'export.all_configs': 'All Configurations',
                 'export.interface_texts': 'Base Interface Texts',
                 'export.minify_code': 'Minify Code',
-                'export.btn_download': '📥 Download webchat-config.js',
-                'export.btn_export_full': '📤 Export Full File with Current Settings',
-                'export.btn_copy': '📋 Copy to Clipboard',
-                'export.export_info': '<strong>Download webchat-config.js</strong> - downloads saved configuration from server as is.<br><strong>Export Full File with Current Settings</strong> - creates complete working webchat-config.js file with all functions, translations and code, but with current form settings (without saving to server). Perfect for creating individual configurations.',
+                'export.btn_export_full': '📤 Export Configuration',
+                'export.export_info': '<strong>Export Configuration</strong> - downloads webchat-config.js file with your settings from browser in .js format. All data is stored locally in your browser.',
                 'export.import_title': 'Import Configuration',
                 'export.import_desc': 'Load existing configuration file for editing',
                 'export.import_warning': 'Import will replace all current settings. It is recommended to create a backup first.',
@@ -7909,40 +7898,29 @@ function collectGlobalSettings() {
 }
 
 function saveBaseSettings() {
-    console.log('💾 Сохранение базовых настроек');
+    console.log('💾 Сохранение базовых настроек в localStorage');
 
     const baseSettings = collectBaseSettings();
 
     showSaveIndicator('saving', t('save.saving_base'));
 
-    fetch('save-webchat-config.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            type: 'base',
-            baseConfig: baseSettings
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            showSaveIndicator('success', t('save.base_saved'));
-            isDirty = false;
+    try {
+        // Сохраняем в localStorage
+        localStorage.setItem('baseConfig', JSON.stringify(baseSettings));
 
-            // Обновляем в памяти
-            if (window.baseConfig) {
-                Object.assign(window.baseConfig, baseSettings);
-            }
-        } else {
-            showSaveIndicator('error', data.error || t('save.save_error'));
+        showSaveIndicator('success', t('save.base_saved'));
+        isDirty = false;
+
+        // Обновляем в памяти
+        if (window.baseConfig) {
+            Object.assign(window.baseConfig, baseSettings);
         }
-    })
-    .catch(error => {
-        console.error('❌ Ошибка:', error);
-        showSaveIndicator('error', t('save.server_error'));
-    });
+
+        console.log('✅ Базовые настройки сохранены в localStorage');
+    } catch (error) {
+        console.error('❌ Ошибка сохранения:', error);
+        showSaveIndicator('error', 'Ошибка сохранения: ' + error.message);
+    }
 }
 
 // Сбор данных конфигурации
@@ -8609,75 +8587,51 @@ function saveNewConfig() {
 
         console.log('✅ Конфигурация создана в памяти');
 
-        // ✅ НОВОЕ: Отправляем на сервер
-        console.log('📤 Отправка конфигурации на сервер...');
+        // ✅ Сохраняем в localStorage
+        console.log('💾 Сохранение конфигурации в localStorage...');
         showSaveIndicator('saving', t('save.saving_config'));
 
-        fetch('save-webchat-config.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                type: 'create',
-                configId: fullConfigId,
-                configData: newConfig
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log('📡 Ответ сервера:', data);
+        try {
+            // Сохраняем новую конфигурацию
+            localStorage.setItem(fullConfigId, JSON.stringify(newConfig));
 
-            if (data.success) {
-                console.log('✅ Конфигурация сохранена на сервере');
+            // Обновляем GlobalConfigSettings
+            const globalSettings = JSON.parse(localStorage.getItem('GlobalConfigSettings') || '{}');
+            if (!globalSettings.availableConfigs) {
+                globalSettings.availableConfigs = {};
+            }
+            globalSettings.availableConfigs[fullConfigId] = {
+                enabled: true,
+                order: configOrder
+            };
+            localStorage.setItem('GlobalConfigSettings', JSON.stringify(globalSettings));
 
-                // Закрываем модальное окно
-                const modal = document.getElementById('createConfigModal');
-                if (modal) {
-                    modal.remove();
-                    console.log('✅ Модальное окно удалено');
-                } else {
-                    document.querySelectorAll('.modal-overlay').forEach(m => m.remove());
-                }
+            console.log('✅ Конфигурация сохранена в localStorage');
 
-                // Показываем уведомление
-                showSaveIndicator('success', t('save.config_created').replace('{name}', configName));
-
-                // Перезагружаем список конфигураций
-                setTimeout(() => {
-                    loadConfigurationsList();
-                    updateSidebarConfigs();
-                    console.log('✅ Список конфигураций обновлён');
-                }, 300);
-
-                console.log('🎉 Процесс создания завершён успешно');
+            // Закрываем модальное окно
+            const modal = document.getElementById('createConfigModal');
+            if (modal) {
+                modal.remove();
+                console.log('✅ Модальное окно удалено');
             } else {
-                showSaveIndicator('error', data.error || t('save.server_save_error'));
-                console.error('❌ Ошибка от сервера:', data.error);
+                document.querySelectorAll('.modal-overlay').forEach(m => m.remove());
+            }
 
-                // Откатываем создание в памяти
-                delete window[fullConfigId];
-                if (window.ChatConfigs) {
-                    delete window.ChatConfigs[configId];
-                }
-                if (window.GlobalConfigSettings?.availableConfigs) {
-                    delete window.GlobalConfigSettings.availableConfigs[fullConfigId];
-                }
-            }
-        })
-        .catch(error => {
-            console.error('❌ Ошибка запроса:', error);
-            showSaveIndicator('error', t('save.server_error'));
+            // Показываем уведомление
+            showSaveIndicator('success', t('save.config_created').replace('{name}', configName));
 
-            // Откатываем создание в памяти
-            delete window[fullConfigId];
-            if (window.ChatConfigs) {
-                delete window.ChatConfigs[configId];
-            }
-            if (window.GlobalConfigSettings?.availableConfigs) {
-                delete window.GlobalConfigSettings.availableConfigs[fullConfigId];
-            }
-        });
+            // Перезагружаем список конфигураций
+            setTimeout(() => {
+                loadConfigurationsList();
+                updateSidebarConfigs();
+                console.log('✅ Список конфигураций обновлён');
+            }, 300);
+
+            console.log('🎉 Процесс создания завершён успешно');
+        } catch (error) {
+            console.error('❌ Ошибка сохранения:', error);
+            showSaveIndicator('error', 'Ошибка сохранения: ' + error.message);
+        }
 
     } catch (error) {
         console.error('❌ ОШИБКА при создании конфигурации:', error);
@@ -8976,58 +8930,29 @@ function createConfigurationObject(configId, name, icon, description, order) {
     // Обновляем боковое меню (показываем/скрываем конфигурацию)
     updateSidebarConfigs();
 
-    // ✅ Отправляем изменения на сервер
-    console.log('📤 Отправка статуса на сервер...');
+    // ✅ Сохраняем изменения в localStorage
+    console.log('💾 Сохранение статуса в localStorage...');
     showSaveIndicator('saving', t('save.saving_status'));
 
-    fetch('save-webchat-config.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            type: 'global-partial',
-            fields: {
-                availableConfigs: window.GlobalConfigSettings.availableConfigs
-            }
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log('📡 Ответ сервера:', data);
-
-        if (data.success) {
-            console.log('✅ Статус сохранен на сервере');
-            showSaveIndicator('success', newStatus ? t('save.config_enabled') : t('save.config_disabled'));
-            isDirty = false;
-        } else {
-            showSaveIndicator('error', data.error || t('save.status_error'));
-            console.error('❌ Ошибка от сервера:', data.error);
-
-            // Откатываем изменения в памяти при ошибке
-            window.GlobalConfigSettings.availableConfigs[configId].enabled = currentStatus;
-
-            // Откатываем визуальный индикатор
-            if (card) {
-                const statusDot = card.querySelector('.config-card-status');
-                if (statusDot) {
-                    if (currentStatus) {
-                        statusDot.classList.remove('disabled');
-                    } else {
-                        statusDot.classList.add('disabled');
-                    }
-                }
-                const toggleButton = card.querySelector('.btn-secondary');
-                if (toggleButton) {
-                    toggleButton.innerHTML = `🔄 ${currentStatus ? t('btn.off') : t('btn.on')}`;
-                }
-            }
-            updateSidebarConfigs();
+    try {
+        // Получаем текущие глобальные настройки
+        const globalSettings = JSON.parse(localStorage.getItem('GlobalConfigSettings') || '{}');
+        if (!globalSettings.availableConfigs) {
+            globalSettings.availableConfigs = {};
         }
-    })
-    .catch(error => {
-        console.error('❌ Ошибка запроса:', error);
-        showSaveIndicator('error', t('save.server_error'));
+
+        // Обновляем статус
+        globalSettings.availableConfigs = window.GlobalConfigSettings.availableConfigs;
+
+        // Сохраняем
+        localStorage.setItem('GlobalConfigSettings', JSON.stringify(globalSettings));
+
+        console.log('✅ Статус сохранен в localStorage');
+        showSaveIndicator('success', newStatus ? t('save.config_enabled') : t('save.config_disabled'));
+        isDirty = false;
+    } catch (error) {
+        console.error('❌ Ошибка сохранения:', error);
+        showSaveIndicator('error', 'Ошибка сохранения: ' + error.message);
 
         // Откатываем изменения в памяти при ошибке
         window.GlobalConfigSettings.availableConfigs[configId].enabled = currentStatus;
@@ -9044,11 +8969,11 @@ function createConfigurationObject(configId, name, icon, description, order) {
             }
             const toggleButton = card.querySelector('.btn-secondary');
             if (toggleButton) {
-                toggleButton.innerHTML = `🔄 ${currentStatus ? t('btn.on') : t('btn.off')}`;
+                toggleButton.innerHTML = `🔄 ${currentStatus ? t('btn.off') : t('btn.on')}`;
             }
         }
         updateSidebarConfigs();
-    });
+    }
 }
 
 // ===============================================
@@ -9059,144 +8984,158 @@ function deleteConfig(configId) {
         return;
     }
 
-    console.log('🗑️ Удаление конфигурации (локально):', configId);
+    console.log('🗑️ Удаление конфигурации:', configId);
 
-    // Удаляем из window
-    delete window[configId];
+    try {
+        // Удаляем из localStorage
+        localStorage.removeItem(configId);
+        console.log('✅ Конфигурация удалена из localStorage');
 
-    // Удаляем из ChatConfigs
-    if (window.ChatConfigs) {
-        const shortName = configId.replace('Config', '');
-        delete window.ChatConfigs[shortName];
+        // Удаляем из GlobalConfigSettings в localStorage
+        const globalSettings = JSON.parse(localStorage.getItem('GlobalConfigSettings') || '{}');
+        if (globalSettings.availableConfigs && globalSettings.availableConfigs[configId]) {
+            delete globalSettings.availableConfigs[configId];
+            localStorage.setItem('GlobalConfigSettings', JSON.stringify(globalSettings));
+            console.log('✅ Удалено из GlobalConfigSettings в localStorage');
+        }
+
+        // Удаляем из window
+        delete window[configId];
+
+        // Удаляем из ChatConfigs
+        if (window.ChatConfigs) {
+            const shortName = configId.replace('Config', '');
+            delete window.ChatConfigs[shortName];
+        }
+
+        // Удаляем из GlobalConfigSettings в памяти
+        if (window.GlobalConfigSettings?.availableConfigs) {
+            delete window.GlobalConfigSettings.availableConfigs[configId];
+        }
+
+        console.log('✅ Конфигурация полностью удалена');
+        showSaveIndicator('success', t('save.config_deleted'));
+
+        // Обновляем боковое меню
+        updateSidebarConfigs();
+
+        // Перезагружаем список
+        setTimeout(() => {
+            loadConfigurationsList();
+        }, 500);
+    } catch (error) {
+        console.error('❌ Ошибка удаления:', error);
+        showSaveIndicator('error', 'Ошибка удаления: ' + error.message);
     }
-
-    // Удаляем из GlobalConfigSettings
-    if (window.GlobalConfigSettings?.availableConfigs) {
-        delete window.GlobalConfigSettings.availableConfigs[configId];
-    }
-
-    console.log('✅ Конфигурация удалена локально');
-    showSaveIndicator('success', t('save.config_deleted'));
-
-    // Обновляем боковое меню
-    updateSidebarConfigs();
-
-    // Перезагружаем список
-    setTimeout(() => {
-        loadConfigurationsList();
-    }, 500);
 }
 
-        function exportConfig() {
-    console.log('📤 Экспорт полной конфигурации с сервера...');
-
-    showSaveIndicator('saving', t('save.preparing_export'));
-
-    // Используем PHP обработчик для корректного экспорта с заголовками
-    const link = document.createElement('a');
-    link.href = 'download-full-config.php';
-    link.style.display = 'none';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    showSaveIndicator('success', t('save.config_downloaded'));
-}
-
-// ✅ Экспорт полного файла webchat-config.js с текущими настройками из формы
+// ✅ Экспорт полного файла webchat-config.js с текущими настройками из localStorage
 function exportCurrentConfig() {
-    console.log('📤 Экспорт полного файла с текущими настройками...');
+    console.log('📤 Экспорт конфигурации из localStorage...');
     showSaveIndicator('saving', t('save.preparing_export_current'));
 
     try {
-        // Собираем данные из текущей формы
-        const currentConfigData = collectConfigData();
+        // Собираем все данные из localStorage
+        const allConfigs = {};
 
-        if (!currentConfigData || !currentConfig) {
-            showSaveIndicator('error', t('save.select_config_first'));
+        // Получаем список всех ключей конфигураций
+        const configKeys = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && (key.endsWith('Config') || key === 'GlobalConfigSettings')) {
+                configKeys.push(key);
+            }
+        }
+
+        // Загружаем каждую конфигурацию
+        for (const key of configKeys) {
+            const value = localStorage.getItem(key);
+            if (value) {
+                try {
+                    allConfigs[key] = JSON.parse(value);
+                } catch (e) {
+                    console.warn(`Не удалось распарсить ${key}:`, e);
+                }
+            }
+        }
+
+        if (Object.keys(allConfigs).length === 0) {
+            showSaveIndicator('error', 'Нет сохраненных конфигураций для экспорта');
             return;
         }
 
-        // Собираем все конфигурации для отправки на сервер
-        const exportData = {};
+        console.log('📦 Найдено конфигураций:', Object.keys(allConfigs));
 
-        // Получаем GlobalConfigSettings
-        if (window.GlobalConfigSettings) {
-            const globalSettings = JSON.parse(JSON.stringify(window.GlobalConfigSettings));
-            // Обновляем availableConfigs с текущими данными
-            if (!globalSettings.availableConfigs) {
-                globalSettings.availableConfigs = {};
+        // Конвертируем в JavaScript формат
+        let jsContent = '// webchat-config.js - Экспортировано из браузера\n';
+        jsContent += '// Дата экспорта: ' + new Date().toLocaleString('ru-RU') + '\n\n';
+
+        // Функция конвертации объекта в JavaScript код
+        function toJsCode(obj, indent = 0) {
+            const spaces = '    '.repeat(indent);
+            const nextSpaces = '    '.repeat(indent + 1);
+
+            if (obj === null) return 'null';
+            if (obj === undefined) return 'undefined';
+            if (typeof obj === 'boolean') return obj ? 'true' : 'false';
+            if (typeof obj === 'number') return String(obj);
+            if (typeof obj === 'string') return '"' + obj.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n') + '"';
+
+            if (Array.isArray(obj)) {
+                if (obj.length === 0) return '[]';
+                const items = obj.map(item => nextSpaces + toJsCode(item, indent + 1));
+                return '[\n' + items.join(',\n') + '\n' + spaces + ']';
             }
-            globalSettings.availableConfigs[currentConfig] = {
-                enabled: true,
-                order: currentConfigData.switcherSettings?.order || 1,
-                labels: currentConfigData.switcherSettings?.labels || {},
-                descriptions: currentConfigData.switcherSettings?.descriptions || {}
-            };
-            exportData.GlobalConfigSettings = globalSettings;
+
+            if (typeof obj === 'object') {
+                const keys = Object.keys(obj);
+                if (keys.length === 0) return '{}';
+
+                const items = keys.map(key => {
+                    const validKey = /^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(key);
+                    const keyStr = validKey ? key : '"' + key + '"';
+                    return nextSpaces + keyStr + ': ' + toJsCode(obj[key], indent + 1);
+                });
+
+                return '{\n' + items.join(',\n') + '\n' + spaces + '}';
+            }
+
+            return 'null';
         }
 
-        // Добавляем текущую редактируемую конфигурацию
-        exportData.configName = currentConfig;
-        exportData.configData = currentConfigData;
-        exportData[currentConfig] = currentConfigData;
-
-        // Добавляем остальные конфигурации из памяти (кроме текущей)
-        const configNames = ['baseConfig', 'financeConfig', 'ecommerceConfig', 'techConfig', 'educationConfig'];
-        for (const configName of configNames) {
-            if (configName !== currentConfig && window[configName] && window[configName].configId) {
-                exportData[configName] = window[configName];
-            }
+        // Экспортируем каждую конфигурацию
+        for (const [configName, configData] of Object.entries(allConfigs)) {
+            jsContent += `// ${configName}\n`;
+            jsContent += `const ${configName} = ${toJsCode(configData)};\n\n`;
         }
 
-        console.log('📦 Отправка данных на сервер для генерации полного файла...', Object.keys(exportData));
+        // Создаем Blob и скачиваем
+        const blob = new Blob([jsContent], { type: 'application/javascript; charset=utf-8' });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
 
-        // Отправляем на PHP обработчик для получения полного файла
-        fetch('export-full-config.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(exportData)
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Ошибка сервера: ' + response.status);
-            }
-            return response.blob();
-        })
-        .then(blob => {
-            // Создаем ссылку для скачивания
-            const url = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
+        // Формируем имя файла
+        const date = new Date().toISOString().slice(0, 10);
+        const time = new Date().toTimeString().slice(0, 8).replace(/:/g, '-');
+        link.download = `webchat-config-${date}_${time}.js`;
 
-            // Формируем имя файла
-            const date = new Date().toISOString().slice(0, 10);
-            const time = new Date().toTimeString().slice(0, 8).replace(/:/g, '-');
-            link.download = `webchat-config-${date}_${time}.js`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
 
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            window.URL.revokeObjectURL(url);
-
-            showSaveIndicator('success', t('save.config_exported'));
-            console.log('✅ Экспорт полного файла завершен');
-        })
-        .catch(error => {
-            console.error('❌ Ошибка экспорта:', error);
-            showSaveIndicator('error', t('save.export_error').replace('{error}', error.message));
-        });
+        showSaveIndicator('success', t('save.config_exported'));
+        console.log('✅ Экспорт завершен');
 
     } catch (error) {
         console.error('❌ Ошибка экспорта:', error);
-        showSaveIndicator('error', t('save.export_settings_error'));
+        showSaveIndicator('error', 'Ошибка экспорта: ' + error.message);
     }
 }
 
         function importConfig() {
-            console.log('📥 Импорт конфигурации (локально)');
+            console.log('📥 Импорт конфигурации в localStorage...');
 
             // Создаем input для выбора файла
             const input = document.createElement('input');
@@ -9227,61 +9166,59 @@ function exportCurrentConfig() {
                             // Если JSON файл
                             importedData = JSON.parse(content);
                         } else {
-                            // Если JS файл, извлекаем объекты из const объявлений
-                            // Ищем GlobalConfigSettings
-                            const globalMatch = content.match(/const\s+GlobalConfigSettings\s*=\s*({[\s\S]*?});/);
-                            if (globalMatch) {
-                                importedData.GlobalConfigSettings = JSON.parse(globalMatch[1]);
-                                console.log('✅ Найден GlobalConfigSettings');
+                            // Если JS файл - выполняем код в изолированном контексте
+                            // Создаем функцию которая выполнит код и вернет все объявленные переменные
+                            const extractedVars = {};
+
+                            // Находим все объявления const/let/var
+                            const varPattern = /(?:const|let|var)\s+(\w+)\s*=\s*({[\s\S]*?});/g;
+                            let match;
+
+                            while ((match = varPattern.exec(content)) !== null) {
+                                const varName = match[1];
+                                const varValue = match[2];
+
+                                try {
+                                    // Используем Function constructor для безопасного выполнения
+                                    // Возвращаем объект напрямую
+                                    const func = new Function('return ' + varValue);
+                                    extractedVars[varName] = func();
+                                    console.log('✅ Извлечена переменная:', varName);
+                                } catch (err) {
+                                    console.warn(`Не удалось извлечь ${varName}:`, err.message);
+                                }
                             }
 
-                            // Ищем все конфигурации (baseConfig, financeConfig, и т.д.)
-                            const configMatches = content.matchAll(/const\s+(\w+Config)\s*=\s*({[\s\S]*?});/g);
-                            for (const match of configMatches) {
-                                const configName = match[1];
-                                const configData = JSON.parse(match[2]);
-                                importedData[configName] = configData;
-                                console.log('✅ Найдена конфигурация:', configName);
+                            importedData = extractedVars;
+                        }
+
+                        if (Object.keys(importedData).length === 0) {
+                            showSaveIndicator('error', 'Не найдено конфигураций в файле');
+                            return;
+                        }
+
+                        // Сохраняем данные в localStorage
+                        let savedCount = 0;
+                        for (const [key, value] of Object.entries(importedData)) {
+                            if (key === 'GlobalConfigSettings' || key.endsWith('Config')) {
+                                try {
+                                    localStorage.setItem(key, JSON.stringify(value));
+                                    console.log('✅ Сохранено в localStorage:', key);
+                                    savedCount++;
+                                } catch (e) {
+                                    console.error(`Ошибка сохранения ${key}:`, e);
+                                }
                             }
                         }
 
-                        // Загружаем данные в память (window объекты)
-                        if (importedData.GlobalConfigSettings) {
-                            window.GlobalConfigSettings = importedData.GlobalConfigSettings;
-                            console.log('✅ GlobalConfigSettings загружены в память');
-                        }
-
-                        // Загружаем конфигурации
-                        for (const key in importedData) {
-                            if (key !== 'GlobalConfigSettings' && key.endsWith('Config')) {
-                                window[key] = importedData[key];
-                                // Также добавляем в ChatConfigs
-                                if (!window.ChatConfigs) window.ChatConfigs = {};
-                                const shortName = key.replace('Config', '');
-                                window.ChatConfigs[shortName] = importedData[key];
-                                console.log('✅ Конфигурация загружена:', key);
-                            }
-                        }
-
-                        showSaveIndicator('success', t('save.config_imported'));
-                        console.log('✅ Конфигурация импортирована локально');
+                        showSaveIndicator('success', `Импортировано ${savedCount} конфигураций`);
+                        console.log('✅ Конфигурации сохранены в localStorage');
 
                         // Обновляем UI через 500мс
                         setTimeout(() => {
-                            // Обновляем список конфигураций в боковом меню
-                            if (typeof updateSidebarConfigs === 'function') {
-                                updateSidebarConfigs();
-                            }
-                            // Обновляем список конфигураций на странице "Все конфигурации"
-                            if (typeof loadConfigurationsList === 'function') {
-                                loadConfigurationsList();
-                            }
-                            // Если есть текущая открытая конфигурация, перезагружаем её
-                            if (currentConfig && typeof loadConfigData === 'function') {
-                                loadConfigData(currentConfig);
-                            }
-                            showSaveIndicator('success', 'Конфигурация загружена в редактор!');
-                        }, 500);
+                            // Перезагружаем страницу чтобы загрузить новые конфигурации
+                            location.reload();
+                        }, 1000);
 
                     } catch (error) {
                         console.error('❌ Ошибка парсинга файла:', error);
@@ -9298,35 +9235,6 @@ function exportCurrentConfig() {
             };
 
             input.click();
-        }
-
-        function copyConfigToClipboard() {
-            console.log('Копирование в буфер обмена');
-
-            // Собираем все конфигурации
-            const configs = { GlobalConfigSettings: window.GlobalConfigSettings };
-            for (let key in window) {
-                if (key.endsWith('Config') && typeof window[key] === 'object' && window[key] !== null && window[key].configId) {
-                    configs[key] = window[key];
-                }
-            }
-
-            // Создаем текст для копирования
-            let jsContent = '// webchat-config.js - Конфигурация\n\n';
-            jsContent += 'const GlobalConfigSettings = ' + JSON.stringify(configs.GlobalConfigSettings, null, 2) + ';\n\n';
-            Object.keys(configs).forEach(key => {
-                if (key !== 'GlobalConfigSettings') {
-                    jsContent += `const ${key} = ${JSON.stringify(configs[key], null, 2)};\n\n`;
-                }
-            });
-
-            // Копируем в буфер обмена
-            navigator.clipboard.writeText(jsContent).then(() => {
-                showSaveIndicator('success', t('export.copied'));
-            }).catch(err => {
-                console.error('Ошибка копирования:', err);
-                showSaveIndicator('error', t('export.copy_error'));
-            });
         }
 
         // ========================
@@ -11814,32 +11722,21 @@ function saveGlobalSettings() {
 
     showSaveIndicator('saving', t('save.saving_global'));
 
-    fetch('save-webchat-config.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            type: 'global',
-            globalSettings: globalSettings
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            showSaveIndicator('success', t('save.global_settings_saved'));
-            isDirty = false;
+    try {
+        // Сохраняем в localStorage
+        localStorage.setItem('GlobalConfigSettings', JSON.stringify(globalSettings));
 
-            // Обновляем в памяти
-            window.GlobalConfigSettings = globalSettings;
-        } else {
-            showSaveIndicator('error', data.error || t('save.save_error'));
-        }
-    })
-    .catch(error => {
-        console.error('❌ Ошибка:', error);
-        showSaveIndicator('error', 'Ошибка связи с сервером');
-    });
+        showSaveIndicator('success', t('save.global_settings_saved'));
+        isDirty = false;
+
+        // Обновляем в памяти
+        window.GlobalConfigSettings = globalSettings;
+
+        console.log('✅ Глобальные настройки сохранены в localStorage');
+    } catch (error) {
+        console.error('❌ Ошибка сохранения:', error);
+        showSaveIndicator('error', 'Ошибка сохранения: ' + error.message);
+    }
 }
 
 // Привязка кнопки сохранения глобальных настроек
