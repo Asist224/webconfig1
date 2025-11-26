@@ -9030,15 +9030,22 @@ function deleteConfig(configId) {
 }
 
 // ✅ Экспорт полного файла webchat-config.js с текущими настройками из localStorage
-function exportCurrentConfig() {
-    console.log('📤 Экспорт конфигурации из localStorage...');
+async function exportCurrentConfig() {
+    console.log('📤 Экспорт ПОЛНОГО файла конфигурации с измененными настройками...');
     showSaveIndicator('saving', t('save.preparing_export_current'));
 
     try {
-        // Собираем все данные из localStorage
-        const allConfigs = {};
+        // 1. Загружаем полный файл webchat-config.js
+        console.log('📥 Загрузка оригинального файла webchat-config.js...');
+        const response = await fetch('webchat-config.js');
+        if (!response.ok) {
+            throw new Error('Не удалось загрузить webchat-config.js: ' + response.status);
+        }
+        let fullContent = await response.text();
+        console.log('✅ Файл загружен, размер:', fullContent.length, 'байт');
 
-        // Получаем список всех ключей конфигураций
+        // 2. Собираем измененные данные из localStorage
+        const modifiedConfigs = {};
         const configKeys = [];
         for (let i = 0; i < localStorage.length; i++) {
             const key = localStorage.key(i);
@@ -9047,78 +9054,212 @@ function exportCurrentConfig() {
             }
         }
 
-        // Загружаем каждую конфигурацию
         for (const key of configKeys) {
             const value = localStorage.getItem(key);
             if (value) {
                 try {
-                    allConfigs[key] = JSON.parse(value);
+                    modifiedConfigs[key] = JSON.parse(value);
+                    console.log('📝 Найдена измененная конфигурация:', key);
                 } catch (e) {
                     console.warn(`Не удалось распарсить ${key}:`, e);
                 }
             }
         }
 
-        if (Object.keys(allConfigs).length === 0) {
-            showSaveIndicator('error', 'Нет сохраненных конфигураций для экспорта');
-            return;
-        }
+        // Если есть измененные конфигурации, заменяем их в полном файле
+        if (Object.keys(modifiedConfigs).length > 0) {
+            console.log('🔄 Замена измененных конфигураций в полном файле...');
 
-        console.log('📦 Найдено конфигураций:', Object.keys(allConfigs));
+            // Функция конвертации объекта в JavaScript код
+            function toJsCode(obj, indent = 0) {
+                const spaces = '    '.repeat(indent);
+                const nextSpaces = '    '.repeat(indent + 1);
 
-        // Конвертируем в JavaScript формат
-        let jsContent = '// webchat-config.js - Экспортировано из браузера\n';
-        jsContent += '// Дата экспорта: ' + new Date().toLocaleString('ru-RU') + '\n\n';
+                if (obj === null) return 'null';
+                if (obj === undefined) return 'undefined';
+                if (typeof obj === 'boolean') return obj ? 'true' : 'false';
+                if (typeof obj === 'number') return String(obj);
+                if (typeof obj === 'string') return '"' + obj.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n').replace(/\r/g, '\\r').replace(/\t/g, '\\t') + '"';
 
-        // Функция конвертации объекта в JavaScript код
-        function toJsCode(obj, indent = 0) {
-            const spaces = '    '.repeat(indent);
-            const nextSpaces = '    '.repeat(indent + 1);
+                if (Array.isArray(obj)) {
+                    if (obj.length === 0) return '[]';
+                    const items = obj.map(item => nextSpaces + toJsCode(item, indent + 1));
+                    return '[\n' + items.join(',\n') + '\n' + spaces + ']';
+                }
 
-            if (obj === null) return 'null';
-            if (obj === undefined) return 'undefined';
-            if (typeof obj === 'boolean') return obj ? 'true' : 'false';
-            if (typeof obj === 'number') return String(obj);
-            if (typeof obj === 'string') return '"' + obj.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n') + '"';
+                if (typeof obj === 'object') {
+                    const keys = Object.keys(obj);
+                    if (keys.length === 0) return '{}';
 
-            if (Array.isArray(obj)) {
-                if (obj.length === 0) return '[]';
-                const items = obj.map(item => nextSpaces + toJsCode(item, indent + 1));
-                return '[\n' + items.join(',\n') + '\n' + spaces + ']';
+                    const items = keys.map(key => {
+                        const validKey = /^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(key);
+                        const keyStr = validKey ? key : '"' + key + '"';
+                        return nextSpaces + keyStr + ': ' + toJsCode(obj[key], indent + 1);
+                    });
+
+                    return '{\n' + items.join(',\n') + '\n' + spaces + '}';
+                }
+
+                return 'null';
             }
 
-            if (typeof obj === 'object') {
-                const keys = Object.keys(obj);
-                if (keys.length === 0) return '{}';
+            // Функция замены конфигурации в JS файле
+            function replaceConfigInFile(content, configName, configData) {
+                // Ищем объявление переменной (const, let, var)
+                const patterns = [
+                    // Простой объект: const configName = {
+                    new RegExp('(const|var|let)\\s+' + configName + '\\s*=\\s*\\{', 'g'),
+                    // mergeConfigs: const configName = mergeConfigs({
+                    new RegExp('(const|var|let)\\s+' + configName + '\\s*=\\s*mergeConfigs\\s*\\(\\s*\\{', 'g')
+                ];
 
-                const items = keys.map(key => {
-                    const validKey = /^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(key);
-                    const keyStr = validKey ? key : '"' + key + '"';
-                    return nextSpaces + keyStr + ': ' + toJsCode(obj[key], indent + 1);
-                });
+                let matchFound = false;
+                let keyword = 'const';
+                let isMergeConfigs = false;
 
-                return '{\n' + items.join(',\n') + '\n' + spaces + '}';
+                for (let i = 0; i < patterns.length; i++) {
+                    const pattern = patterns[i];
+                    const match = pattern.exec(content);
+                    if (match) {
+                        matchFound = true;
+                        keyword = match[1];
+                        isMergeConfigs = (i === 1);
+
+                        const startPos = match.index;
+
+                        // Находим конец объявления
+                        let depth = 0;
+                        let inString = false;
+                        let stringChar = '';
+                        let escaped = false;
+                        let endPos = -1;
+
+                        const searchStart = isMergeConfigs ?
+                            content.indexOf('(', startPos) :
+                            content.indexOf('{', startPos);
+
+                        if (searchStart === -1) continue;
+
+                        for (let j = searchStart; j < content.length; j++) {
+                            const char = content[j];
+
+                            if (escaped) {
+                                escaped = false;
+                                continue;
+                            }
+
+                            if (char === '\\') {
+                                escaped = true;
+                                continue;
+                            }
+
+                            if (inString) {
+                                if (char === stringChar) {
+                                    inString = false;
+                                }
+                                continue;
+                            }
+
+                            if (char === '"' || char === "'" || char === '`') {
+                                inString = true;
+                                stringChar = char;
+                                continue;
+                            }
+
+                            if (isMergeConfigs) {
+                                if (char === '(') depth++;
+                                else if (char === ')') {
+                                    depth--;
+                                    if (depth === 0) {
+                                        endPos = j;
+                                        break;
+                                    }
+                                }
+                            } else {
+                                if (char === '{') depth++;
+                                else if (char === '}') {
+                                    depth--;
+                                    if (depth === 0) {
+                                        endPos = j;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+
+                        if (endPos !== -1) {
+                            // Проверяем, есть ли точка с запятой после
+                            let finalEnd = endPos;
+                            let k = endPos + 1;
+                            while (k < content.length && /\s/.test(content[k])) k++;
+                            if (k < content.length && content[k] === ';') {
+                                finalEnd = k;
+                            }
+
+                            // Формируем замену
+                            const jsValue = toJsCode(configData, 0);
+                            let replacement;
+                            if (isMergeConfigs) {
+                                replacement = keyword + ' ' + configName + ' = mergeConfigs(' + jsValue + ', baseConfig, configMethods)';
+                            } else {
+                                replacement = keyword + ' ' + configName + ' = ' + jsValue;
+                            }
+
+                            if (content[finalEnd] === ';') {
+                                replacement += ';';
+                            }
+
+                            // Выполняем замену
+                            const before = content.substring(0, startPos);
+                            const after = content.substring(finalEnd + 1);
+                            content = before + replacement + after;
+
+                            console.log('✅ Заменена конфигурация:', configName);
+                        }
+                        break;
+                    }
+                }
+
+                if (!matchFound) {
+                    console.warn('⚠️ Не найдена конфигурация в файле:', configName);
+                }
+
+                return content;
             }
 
-            return 'null';
+            // Заменяем каждую измененную конфигурацию
+            for (const [configName, configData] of Object.entries(modifiedConfigs)) {
+                fullContent = replaceConfigInFile(fullContent, configName, configData);
+            }
+        } else {
+            console.log('ℹ️ Нет измененных конфигураций, экспортируется оригинальный файл');
         }
 
-        // Экспортируем каждую конфигурацию
-        for (const [configName, configData] of Object.entries(allConfigs)) {
-            jsContent += `// ${configName}\n`;
-            jsContent += `const ${configName} = ${toJsCode(configData)};\n\n`;
-        }
+        // 3. Добавляем заголовок экспорта
+        const exportHeader = `// webchat-config.js - Экспортировано из браузера
+// Дата экспорта: ${new Date().toLocaleString('ru-RU')}
+// Измененные конфигурации: ${Object.keys(modifiedConfigs).join(', ') || 'нет'}
+// =====================================================================================
+// ПОЛНАЯ КОНФИГУРАЦИЯ ВЕБ-ЧАТА С ПОЛЬЗОВАТЕЛЬСКИМИ НАСТРОЙКАМИ
+// Включает все настройки, переводы, тексты, функции и параметры
+// =====================================================================================
 
-        // Создаем Blob и скачиваем
-        const blob = new Blob([jsContent], { type: 'application/javascript; charset=utf-8' });
+`;
+
+        // Удаляем старый заголовок если есть
+        fullContent = fullContent.replace(/^\/\/\s*webchat-config\.js.*?={5,}\s*/s, '');
+
+        const finalContent = exportHeader + fullContent;
+
+        // 4. Создаем Blob и скачиваем
+        const blob = new Blob([finalContent], { type: 'application/javascript; charset=utf-8' });
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
 
-        // Формируем имя файла
         const date = new Date().toISOString().slice(0, 10);
         const time = new Date().toTimeString().slice(0, 8).replace(/:/g, '-');
-        link.download = `webchat-config-${date}_${time}.js`;
+        link.download = `webchat-config-full-${date}_${time}.js`;
 
         document.body.appendChild(link);
         link.click();
@@ -9126,7 +9267,7 @@ function exportCurrentConfig() {
         window.URL.revokeObjectURL(url);
 
         showSaveIndicator('success', t('save.config_exported'));
-        console.log('✅ Экспорт завершен');
+        console.log('✅ Экспорт полного файла завершен, размер:', finalContent.length, 'байт');
 
     } catch (error) {
         console.error('❌ Ошибка экспорта:', error);
