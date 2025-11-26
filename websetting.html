@@ -7793,6 +7793,14 @@ function saveCurrentLanguageData() {
     // Обновляем в памяти только измененные поля
     if (window.GlobalConfigSettings) {
         Object.assign(window.GlobalConfigSettings, fieldsToUpdate);
+
+        // ✅ ИСПРАВЛЕНИЕ: Сохраняем в localStorage для экспорта
+        try {
+            localStorage.setItem('GlobalConfigSettings', JSON.stringify(window.GlobalConfigSettings));
+            console.log('✅ Глобальные настройки сохранены в localStorage');
+        } catch (e) {
+            console.error('❌ Ошибка сохранения в localStorage:', e);
+        }
     }
 
     isDirty = false;
@@ -7858,6 +7866,14 @@ function collectGlobalSettings() {
             window.ChatConfigs[shortName] = configData;
         }
 
+        // ✅ ИСПРАВЛЕНИЕ: Сохраняем в localStorage для экспорта
+        try {
+            localStorage.setItem(currentConfig, JSON.stringify(configData));
+            console.log(`✅ Конфигурация ${currentConfig} сохранена в localStorage`);
+        } catch (e) {
+            console.error('❌ Ошибка сохранения в localStorage:', e);
+        }
+
         // Обновляем order в GlobalConfigSettings.availableConfigs
         if (window.GlobalConfigSettings && window.GlobalConfigSettings.availableConfigs && configData.switcherSettings?.order) {
             if (!window.GlobalConfigSettings.availableConfigs[currentConfig]) {
@@ -7865,6 +7881,14 @@ function collectGlobalSettings() {
             }
             window.GlobalConfigSettings.availableConfigs[currentConfig].order = configData.switcherSettings.order;
             console.log(`✅ Обновлен порядок для ${currentConfig}: ${configData.switcherSettings.order}`);
+
+            // ✅ ИСПРАВЛЕНИЕ: Сохраняем обновленные GlobalConfigSettings в localStorage
+            try {
+                localStorage.setItem('GlobalConfigSettings', JSON.stringify(window.GlobalConfigSettings));
+                console.log('✅ GlobalConfigSettings с обновленным порядком сохранены в localStorage');
+            } catch (e) {
+                console.error('❌ Ошибка сохранения GlobalConfigSettings в localStorage:', e);
+            }
         }
 
         // Очищаем несохраненные изменения
