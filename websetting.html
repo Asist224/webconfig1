@@ -1939,7 +1939,7 @@
     </div>
     <div class="nav-item" data-page="export-import">
         <span class="nav-item-icon">📤</span>
-        <span class="nav-item-label" data-i18n="nav.export_import">Экспорт/Импорт</span>
+        <span class="nav-item-label" data-i18n="nav.export_import">Экспорт</span>
     </div>
 </div>
             </nav>
@@ -1999,50 +1999,10 @@
 
                     <div class="form-grid mt-3">
                         <div class="form-group">
-                            <label class="form-label" data-i18n="config_switcher.position">Позиция переключателя</label>
-                            <select class="form-control" id="configSwitcherPosition">
-                                <option value="header" data-i18n="config_switcher.pos_header">В шапке чата</option>
-                                <option value="hidden" data-i18n="config_switcher.pos_hidden">Скрыт</option>
-                                <option value="bottom" data-i18n="config_switcher.pos_bottom">Внизу чата</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
                             <label class="form-label" data-i18n="config_switcher.default_config">Конфигурация по умолчанию</label>
                             <select class="form-control" id="defaultConfigSelector">
                                 <!-- Опции загружаются динамически через updateDefaultConfigSelector() -->
                             </select>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="settings-section">
-                    <div class="settings-section-header">
-                        <h3 class="settings-section-title">
-                            <span>🎨</span> <span data-i18n="theme.title">Настройки темы</span>
-                        </h3>
-                    </div>
-
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label class="form-label" data-i18n="theme.global">Глобальная тема</label>
-                            <select class="form-control">
-                                <option value="auto" data-i18n="theme.auto">Автоматическая</option>
-                                <option value="light" data-i18n="theme.light">Светлая</option>
-                                <option value="dark" data-i18n="theme.dark">Тёмная</option>
-                            </select>
-                            <div class="form-hint" data-i18n="theme.hint">Применяется ко всем конфигурациям по умолчанию</div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label" data-i18n="theme.individual">Индивидуальные темы</label>
-                            <div class="toggle-wrapper">
-                                <div class="toggle-info">
-                                    <div class="toggle-label" data-i18n="theme.allow_override">Разрешить переопределение</div>
-                                </div>
-                                <div class="toggle-switch active" onclick="toggleSwitch(this)">
-                                    <div class="toggle-slider"></div>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -2066,17 +2026,6 @@
 
                     <div class="form-grid mt-3">
                         <div class="form-group">
-                            <label class="form-label" data-i18n="lang.auto_detect">Автоопределение языка</label>
-                            <div class="toggle-wrapper">
-                                <div class="toggle-info">
-                                    <div class="toggle-label" data-i18n="lang.enabled">Включено</div>
-                                </div>
-                                <div class="toggle-switch active" onclick="toggleSwitch(this)">
-                                    <div class="toggle-slider"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-group">
                             <label class="form-label" data-i18n="lang.default">Язык по умолчанию</label>
                             <select class="form-control">
                                 <option value="ru">🇷🇺 Русский</option>
@@ -2095,44 +2044,6 @@
                     </div>
                 </div>
                 <!-- ============================================ -->
-<!-- СЕКЦИЯ: ПРИОРИТЕТ НАСТРОЕК -->
-<!-- ============================================ -->
-<div class="settings-section">
-    <div class="settings-section-header">
-        <h3 class="settings-section-title">
-            <span>🔧</span> <span data-i18n="priority.title">Приоритет настроек конфигураций</span>
-        </h3>
-    </div>
-
-    <div class="info-box">
-        <div class="info-box-icon">ℹ️</div>
-        <div class="info-box-content">
-            <strong data-i18n="priority.info_title">Индивидуальные настройки:</strong> <span data-i18n="priority.info">Если включено, конфигурации могут иметь свои собственные настройки внешнего вида, поведения и технических параметров. Если выключено - используются только базовые настройки.</span>
-        </div>
-    </div>
-
-    <div class="toggle-wrapper">
-        <div class="toggle-info">
-            <div class="toggle-label" data-i18n="priority.allow">Разрешить индивидуальные настройки</div>
-            <div class="toggle-description" data-i18n="priority.allow_desc">Конфигурации могут переопределять базовые настройки</div>
-        </div>
-        <div class="toggle-switch" id="globalUseIndividualToggle" onclick="toggleSwitch(this)">
-            <div class="toggle-slider"></div>
-        </div>
-    </div>
-
-    <div class="toggle-wrapper">
-        <div class="toggle-info">
-            <div class="toggle-label" data-i18n="priority.partial">Частичное переопределение</div>
-            <div class="toggle-description" data-i18n="priority.partial_desc">Конфигурации могут менять только часть настроек</div>
-        </div>
-        <div class="toggle-switch active" id="globalPartialOverrideToggle" onclick="toggleSwitch(this)">
-            <div class="toggle-slider"></div>
-        </div>
-    </div>
-</div>
-
-<!-- ============================================ -->
 <!-- СЕКЦИЯ: АНИМАЦИЯ ОТВЕТОВ ИИ -->
 <!-- ============================================ -->
 <div class="settings-section">
@@ -4104,11 +4015,11 @@
                 </div>
             </div>
 
-            <!-- Страница: Экспорт/Импорт -->
+            <!-- Страница: Экспорт -->
             <div id="export-import" class="page-content" style="display: none;">
                 <div class="page-header">
-                    <h2 data-i18n="export.title">📤 Экспорт и импорт конфигурации</h2>
-                    <p data-i18n="export.subtitle">Сохраняйте и переносите настройки между системами</p>
+                    <h2 data-i18n="export.title">📤 Экспорт конфигурации</h2>
+                    <p data-i18n="export.subtitle">Сохраняйте и экспортируйте настройки</p>
                 </div>
 
                 <div class="settings-section">
@@ -4166,31 +4077,13 @@
                     <div class="warning-box">
                         <div class="info-box-icon">⚠️</div>
                         <div class="info-box-content" data-i18n="export.import_warning">
-                            Импорт заменит все текущие настройки. Рекомендуется сначала создать резервную копию.
+                            Импорт загрузит конфигурацию в редактор для просмотра и редактирования.
                         </div>
                     </div>
 
                     <button class="btn btn-primary" onclick="importConfig()">
                         <span data-i18n="export.btn_import">📤 Импортировать</span>
                     </button>
-                </div>
-
-                <div class="settings-section">
-                    <h3 class="settings-section-title">
-                        <span>💾</span> <span data-i18n="export.backups_title">Резервные копии</span>
-                    </h3>
-
-                    <p class="text-muted mb-3" data-i18n="export.backups_desc">Автоматические резервные копии конфигурации</p>
-
-                    <div class="d-flex gap-3" style="margin-bottom: 15px;">
-                        <button class="btn btn-primary" onclick="createBackup()">
-                            <span data-i18n="export.btn_create_backup">💾 Создать резервную копию</span>
-                        </button>
-                    </div>
-
-                    <div class="list-editor" id="backupsList">
-                        <!-- Список резервных копий загружается динамически -->
-                    </div>
                 </div>
             </div>
         </main>
@@ -5756,12 +5649,7 @@
                 }
             }
 
-            if (typeof loadBackupsList === 'function') {
-                const backupsContainer = document.getElementById('backupsList');
-                if (backupsContainer && backupsContainer.children.length > 0) {
-                    loadBackupsList();
-                }
-            }
+            // loadBackupsList() удален - резервные копии не используются в режиме клиента
 
             console.log('✅ UI translations applied');
         }
@@ -5950,11 +5838,7 @@ document.addEventListener('DOMContentLoaded', function() {
             currentPage = page;
 
             // ✅ НОВОЕ: Обновляем список резервных копий при переходе на страницу экспорта
-            if (page === 'export-import' && typeof loadBackupsList === 'function') {
-                setTimeout(() => {
-                    loadBackupsList();
-                }, 100);
-            }
+            // loadBackupsList() удален - резервные копии не используются в режиме клиента
 
             // ✅ НОВОЕ: Автоматически открываем вкладку "Поведение" при переходе на "Базовые настройки"
             if (page === 'base-settings' && typeof switchBaseTab === 'function') {
@@ -7910,49 +7794,21 @@ function saveCurrentLanguageData() {
 }
 
         function saveConfiguration() {
-    showSaveIndicator('saving');
+    console.log('💾 Сохранение глобальных настроек (локально)');
 
     // Собираем только измененные поля глобальных настроек
     const fieldsToUpdate = collectGlobalSettingsFields();
 
-    console.log('💾 Сохранение глобальных настроек (только измененные поля):', fieldsToUpdate);
+    console.log('Обновляемые поля:', fieldsToUpdate);
 
-    // Отправляем на сервер с типом 'global-partial' для частичного обновления
-    fetch('save-webchat-config.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            type: 'global-partial',
-            fields: fieldsToUpdate
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            showSaveIndicator('success', t('save.global_saved'));
-            isDirty = false;
-            console.log('✅ Сохранено:', data);
+    // Обновляем в памяти только измененные поля
+    if (window.GlobalConfigSettings) {
+        Object.assign(window.GlobalConfigSettings, fieldsToUpdate);
+    }
 
-            // Обновляем в памяти только измененные поля
-            if (window.GlobalConfigSettings) {
-                Object.assign(window.GlobalConfigSettings, fieldsToUpdate);
-            }
-
-            // ✅ Создаем резервную копию после успешного сохранения
-            if (typeof createBackup === 'function') {
-                createBackup();
-            }
-        } else {
-            showSaveIndicator('error', data.error || t('save.save_error'));
-            console.error('❌ Ошибка:', data);
-        }
-    })
-    .catch(error => {
-        showSaveIndicator('error', t('save.server_error'));
-        console.error('❌ Ошибка запроса:', error);
-    });
+    isDirty = false;
+    showSaveIndicator('success', t('save.global_saved'));
+    console.log('✅ Глобальные настройки сохранены локально');
 }
 
 // Вспомогательная функция сбора ТОЛЬКО измененных полей глобальных настроек
@@ -7999,99 +7855,52 @@ function collectGlobalSettings() {
 
         function saveConfig() {
     try {
-        console.log('💾 Сохранение конфигурации...');
-        
+        console.log('💾 Сохранение конфигурации (локально)...');
+
         const configData = collectConfigData();
         console.log('✅ Данные собраны:', configData);
 
-        showSaveIndicator('saving', t('save.saving'));
+        // Обновляем в памяти
+        if (window[currentConfig]) {
+            Object.assign(window[currentConfig], configData);
+        }
+        if (window.ChatConfigs) {
+            const shortName = currentConfig.replace('Config', '');
+            window.ChatConfigs[shortName] = configData;
+        }
 
-        fetch('save-webchat-config.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                type: 'config',
-                configId: currentConfig,
-                configData: configData
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log('📡 Ответ сервера:', data);
-
-            if (data.success) {
-                showSaveIndicator('success', t('save.config_saved'));
-                isDirty = false;
-
-                // ✅ НОВОЕ: Очищаем несохраненные изменения после успешного сохранения
-                if (window.pendingChanges && currentConfig) {
-                    delete window.pendingChanges[currentConfig];
-                    console.log('🗑️ Очищены pendingChanges для:', currentConfig);
-                }
-
-                // Обновляем в памяти
-                if (window[currentConfig]) {
-                    Object.assign(window[currentConfig], configData);
-                }
-                if (window.ChatConfigs) {
-                    const shortName = currentConfig.replace('Config', '');
-                    window.ChatConfigs[shortName] = configData;
-                }
-
-                // ✅ НОВОЕ: Обновляем order в GlobalConfigSettings.availableConfigs
-                if (window.GlobalConfigSettings && window.GlobalConfigSettings.availableConfigs && configData.switcherSettings?.order) {
-                    if (!window.GlobalConfigSettings.availableConfigs[currentConfig]) {
-                        window.GlobalConfigSettings.availableConfigs[currentConfig] = { enabled: true };
-                    }
-                    window.GlobalConfigSettings.availableConfigs[currentConfig].order = configData.switcherSettings.order;
-                    console.log(`✅ Обновлен порядок для ${currentConfig}: ${configData.switcherSettings.order}`);
-
-                    // Сохраняем обновленные глобальные настройки
-                    fetch('save-webchat-config.php', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            type: 'global',
-                            globalSettings: window.GlobalConfigSettings
-                        })
-                    }).then(res => res.json()).then(result => {
-                        if (result.success) {
-                            console.log('✅ GlobalConfigSettings обновлены с новым порядком');
-                        }
-                    });
-                }
-
-                console.log('✅ Сохранение завершено');
-
-                // ✅ Создаем резервную копию после успешного сохранения
-                if (typeof createBackup === 'function') {
-                    createBackup();
-                }
-
-                // ✅ Обновляем боковое меню конфигураций для отображения новой иконки
-                setTimeout(() => {
-                    if (typeof updateSidebarConfigs === 'function') {
-                        updateSidebarConfigs();
-                    }
-                }, 100);
-
-                // ✅ НОВОЕ: Автоматически обновляем предпросмотр после сохранения
-                setTimeout(() => {
-                    if (typeof updatePreview === 'function') {
-                        updatePreview();
-                    }
-                }, 500);
-            } else {
-                showSaveIndicator('error', data.error || t('save.save_error'));
-                console.error('❌ Ошибка:', data.error);
+        // Обновляем order в GlobalConfigSettings.availableConfigs
+        if (window.GlobalConfigSettings && window.GlobalConfigSettings.availableConfigs && configData.switcherSettings?.order) {
+            if (!window.GlobalConfigSettings.availableConfigs[currentConfig]) {
+                window.GlobalConfigSettings.availableConfigs[currentConfig] = { enabled: true };
             }
-        })
-        .catch(error => {
-            console.error('❌ Ошибка запроса:', error);
-            showSaveIndicator('error', t('save.server_error'));
-        });
+            window.GlobalConfigSettings.availableConfigs[currentConfig].order = configData.switcherSettings.order;
+            console.log(`✅ Обновлен порядок для ${currentConfig}: ${configData.switcherSettings.order}`);
+        }
+
+        // Очищаем несохраненные изменения
+        if (window.pendingChanges && currentConfig) {
+            delete window.pendingChanges[currentConfig];
+            console.log('🗑️ Очищены pendingChanges для:', currentConfig);
+        }
+
+        isDirty = false;
+        showSaveIndicator('success', t('save.config_saved'));
+        console.log('✅ Сохранение завершено локально');
+
+        // Обновляем боковое меню конфигураций для отображения новой иконки
+        setTimeout(() => {
+            if (typeof updateSidebarConfigs === 'function') {
+                updateSidebarConfigs();
+            }
+        }, 100);
+
+        // Автоматически обновляем предпросмотр после сохранения
+        setTimeout(() => {
+            if (typeof updatePreview === 'function') {
+                updatePreview();
+            }
+        }, 500);
 
     } catch (error) {
         console.error('❌ Критическая ошибка:', error);
@@ -9243,21 +9052,14 @@ function createConfigurationObject(configId, name, icon, description, order) {
 }
 
 // ===============================================
-// УДАЛЕНИЕ КОНФИГУРАЦИИ
+// УДАЛЕНИЕ КОНФИГУРАЦИИ (ЛОКАЛЬНО)
 // ===============================================
 function deleteConfig(configId) {
     if (!confirm(t('confirm.delete_config').replace('{id}', configId))) {
         return;
     }
 
-    console.log('🗑️ Удаление конфигурации:', configId);
-
-    // Сохраняем копию для возможного отката
-    const backup = {
-        config: window[configId],
-        chatConfig: window.ChatConfigs?.[configId.replace('Config', '')],
-        globalSetting: window.GlobalConfigSettings?.availableConfigs?.[configId]
-    };
+    console.log('🗑️ Удаление конфигурации (локально):', configId);
 
     // Удаляем из window
     delete window[configId];
@@ -9273,62 +9075,16 @@ function deleteConfig(configId) {
         delete window.GlobalConfigSettings.availableConfigs[configId];
     }
 
-    // ✅ НОВОЕ: Отправляем запрос на сервер
-    console.log('📤 Отправка запроса на удаление...');
-    showSaveIndicator('saving', t('save.deleting_config'));
+    console.log('✅ Конфигурация удалена локально');
+    showSaveIndicator('success', t('save.config_deleted'));
 
-    fetch('save-webchat-config.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            type: 'delete',
-            configId: configId
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log('📡 Ответ сервера:', data);
+    // Обновляем боковое меню
+    updateSidebarConfigs();
 
-        if (data.success) {
-            console.log('✅ Конфигурация удалена с сервера');
-            showSaveIndicator('success', t('save.config_deleted'));
-
-            // Обновляем боковое меню
-            updateSidebarConfigs();
-
-            // Перезагружаем список
-            setTimeout(() => {
-                loadConfigurationsList();
-            }, 500);
-        } else {
-            showSaveIndicator('error', data.error || t('save.delete_error'));
-            console.error('❌ Ошибка от сервера:', data.error);
-
-            // Откатываем удаление в памяти
-            if (backup.config) window[configId] = backup.config;
-            if (backup.chatConfig && window.ChatConfigs) {
-                window.ChatConfigs[configId.replace('Config', '')] = backup.chatConfig;
-            }
-            if (backup.globalSetting && window.GlobalConfigSettings?.availableConfigs) {
-                window.GlobalConfigSettings.availableConfigs[configId] = backup.globalSetting;
-            }
-        }
-    })
-    .catch(error => {
-        console.error('❌ Ошибка запроса:', error);
-        showSaveIndicator('error', t('save.server_error'));
-
-        // Откатываем удаление в памяти
-        if (backup.config) window[configId] = backup.config;
-        if (backup.chatConfig && window.ChatConfigs) {
-            window.ChatConfigs[configId.replace('Config', '')] = backup.chatConfig;
-        }
-        if (backup.globalSetting && window.GlobalConfigSettings?.availableConfigs) {
-            window.GlobalConfigSettings.availableConfigs[configId] = backup.globalSetting;
-        }
-    });
+    // Перезагружаем список
+    setTimeout(() => {
+        loadConfigurationsList();
+    }, 500);
 }
 
         function exportConfig() {
@@ -9440,7 +9196,7 @@ function exportCurrentConfig() {
 }
 
         function importConfig() {
-            console.log('📥 Импорт конфигурации');
+            console.log('📥 Импорт конфигурации (локально)');
 
             // Создаем input для выбора файла
             const input = document.createElement('input');
@@ -9457,33 +9213,88 @@ function exportCurrentConfig() {
 
                 showSaveIndicator('saving', t('save.importing_config'));
 
-                // Отправляем файл на сервер через FormData
-                const formData = new FormData();
-                formData.append('config', file);
+                // Читаем файл локально
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    try {
+                        const content = event.target.result;
+                        console.log('📄 Файл прочитан, размер:', content.length);
 
-                fetch('import-webchat-config.php', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
+                        // Парсим файл конфигурации
+                        let importedData = {};
+
+                        if (file.name.endsWith('.json')) {
+                            // Если JSON файл
+                            importedData = JSON.parse(content);
+                        } else {
+                            // Если JS файл, извлекаем объекты из const объявлений
+                            // Ищем GlobalConfigSettings
+                            const globalMatch = content.match(/const\s+GlobalConfigSettings\s*=\s*({[\s\S]*?});/);
+                            if (globalMatch) {
+                                importedData.GlobalConfigSettings = JSON.parse(globalMatch[1]);
+                                console.log('✅ Найден GlobalConfigSettings');
+                            }
+
+                            // Ищем все конфигурации (baseConfig, financeConfig, и т.д.)
+                            const configMatches = content.matchAll(/const\s+(\w+Config)\s*=\s*({[\s\S]*?});/g);
+                            for (const match of configMatches) {
+                                const configName = match[1];
+                                const configData = JSON.parse(match[2]);
+                                importedData[configName] = configData;
+                                console.log('✅ Найдена конфигурация:', configName);
+                            }
+                        }
+
+                        // Загружаем данные в память (window объекты)
+                        if (importedData.GlobalConfigSettings) {
+                            window.GlobalConfigSettings = importedData.GlobalConfigSettings;
+                            console.log('✅ GlobalConfigSettings загружены в память');
+                        }
+
+                        // Загружаем конфигурации
+                        for (const key in importedData) {
+                            if (key !== 'GlobalConfigSettings' && key.endsWith('Config')) {
+                                window[key] = importedData[key];
+                                // Также добавляем в ChatConfigs
+                                if (!window.ChatConfigs) window.ChatConfigs = {};
+                                const shortName = key.replace('Config', '');
+                                window.ChatConfigs[shortName] = importedData[key];
+                                console.log('✅ Конфигурация загружена:', key);
+                            }
+                        }
+
                         showSaveIndicator('success', t('save.config_imported'));
-                        console.log('✅ Конфигурация импортирована:', data);
+                        console.log('✅ Конфигурация импортирована локально');
 
-                        // Перезагружаем страницу через 1 секунду
+                        // Обновляем UI через 500мс
                         setTimeout(() => {
-                            window.location.reload();
-                        }, 1000);
-                    } else {
-                        showSaveIndicator('error', data.error || 'Ошибка импорта');
-                        console.error('❌ Ошибка:', data.error);
+                            // Обновляем список конфигураций в боковом меню
+                            if (typeof updateSidebarConfigs === 'function') {
+                                updateSidebarConfigs();
+                            }
+                            // Обновляем список конфигураций на странице "Все конфигурации"
+                            if (typeof loadConfigurationsList === 'function') {
+                                loadConfigurationsList();
+                            }
+                            // Если есть текущая открытая конфигурация, перезагружаем её
+                            if (currentConfig && typeof loadConfigData === 'function') {
+                                loadConfigData(currentConfig);
+                            }
+                            showSaveIndicator('success', 'Конфигурация загружена в редактор!');
+                        }, 500);
+
+                    } catch (error) {
+                        console.error('❌ Ошибка парсинга файла:', error);
+                        showSaveIndicator('error', 'Ошибка чтения файла: ' + error.message);
                     }
-                })
-                .catch(error => {
-                    console.error('❌ Ошибка импорта:', error);
-                    showSaveIndicator('error', t('save.server_error'));
-                });
+                };
+
+                reader.onerror = function() {
+                    console.error('❌ Ошибка чтения файла');
+                    showSaveIndicator('error', 'Ошибка чтения файла');
+                };
+
+                reader.readAsText(file);
             };
 
             input.click();
@@ -10211,9 +10022,7 @@ document.addEventListener('DOMContentLoaded', function() {
     loadConfigurationFile();
 
     // ✅ Загружаем список резервных копий
-    setTimeout(() => {
-        loadBackupsList();
-    }, 500);
+    // loadBackupsList() удален - резервные копии не используются в режиме клиента
 
     console.log('✅ Инициализация завершена');
 });
