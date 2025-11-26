@@ -10611,6 +10611,58 @@ function loadConfigurationFile() {
             console.log('✅ Найдены настройки:', window.GlobalConfigSettings);
             console.log('✅ Найден ChatConfigs:', Object.keys(window.ChatConfigs));
 
+            // ✅ ПРИМЕНЯЕМ ДАННЫЕ ИЗ LOCALSTORAGE (приоритет над серверными данными)
+            console.log('🔄 Проверка localStorage для перезаписи серверных данных...');
+
+            // Применяем GlobalConfigSettings из localStorage если есть
+            const localGlobalSettings = localStorage.getItem('GlobalConfigSettings');
+            if (localGlobalSettings) {
+                try {
+                    const parsedSettings = JSON.parse(localGlobalSettings);
+                    window.GlobalConfigSettings = parsedSettings;
+                    console.log('✅ GlobalConfigSettings перезаписан из localStorage');
+                } catch (e) {
+                    console.warn('⚠️ Ошибка парсинга GlobalConfigSettings из localStorage:', e);
+                }
+            }
+
+            // Применяем baseConfig из localStorage если есть
+            const localBaseConfig = localStorage.getItem('baseConfig');
+            if (localBaseConfig) {
+                try {
+                    const parsedBaseConfig = JSON.parse(localBaseConfig);
+                    window.baseConfig = parsedBaseConfig;
+                    console.log('✅ baseConfig перезаписан из localStorage');
+                } catch (e) {
+                    console.warn('⚠️ Ошибка парсинга baseConfig из localStorage:', e);
+                }
+            }
+
+            // Применяем все конфигурации ChatConfigs из localStorage
+            if (window.ChatConfigs) {
+                for (const configKey in localStorage) {
+                    if (configKey.endsWith('Config') && configKey !== 'baseConfig' && configKey !== 'GlobalConfigSettings') {
+                        try {
+                            const localConfigData = JSON.parse(localStorage.getItem(configKey));
+                            const shortName = configKey.replace('Config', '');
+
+                            if (window.ChatConfigs[shortName]) {
+                                window.ChatConfigs[shortName] = localConfigData;
+                                console.log(`✅ ${configKey} перезаписан из localStorage`);
+                            } else {
+                                // Если конфигурация новая (не была на сервере), добавляем её
+                                window.ChatConfigs[shortName] = localConfigData;
+                                console.log(`✅ ${configKey} добавлен из localStorage (новая конфигурация)`);
+                            }
+                        } catch (e) {
+                            console.warn(`⚠️ Ошибка парсинга ${configKey} из localStorage:`, e);
+                        }
+                    }
+                }
+            }
+
+            console.log('✅ Применение данных из localStorage завершено');
+
             // ✅ НОВОЕ: Автоматически регистрируем новые конфигурации
             autoRegisterConfigs();
 
