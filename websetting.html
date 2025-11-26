@@ -9124,23 +9124,50 @@ async function exportCurrentConfig() {
         console.log('✅ Файл загружен, размер:', fullContent.length, 'байт');
 
         // 2. Собираем измененные данные из localStorage
+        // ✅ ИСПРАВЛЕНО: Экспортируем только активные конфигурации из GlobalConfigSettings
         const modifiedConfigs = {};
-        const configKeys = [];
-        for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            if (key && (key.endsWith('Config') || key === 'GlobalConfigSettings')) {
-                configKeys.push(key);
+
+        // Загружаем GlobalConfigSettings
+        const globalSettingsJson = localStorage.getItem('GlobalConfigSettings');
+        let globalSettings = null;
+        if (globalSettingsJson) {
+            try {
+                globalSettings = JSON.parse(globalSettingsJson);
+                modifiedConfigs['GlobalConfigSettings'] = globalSettings;
+                console.log('📝 Найдена GlobalConfigSettings');
+            } catch (e) {
+                console.warn('Не удалось распарсить GlobalConfigSettings:', e);
             }
         }
 
-        for (const key of configKeys) {
-            const value = localStorage.getItem(key);
-            if (value) {
-                try {
-                    modifiedConfigs[key] = JSON.parse(value);
-                    console.log('📝 Найдена измененная конфигурация:', key);
-                } catch (e) {
-                    console.warn(`Не удалось распарсить ${key}:`, e);
+        // Экспортируем только конфигурации, которые включены в availableConfigs
+        if (globalSettings && globalSettings.availableConfigs) {
+            for (const configKey of Object.keys(globalSettings.availableConfigs)) {
+                const value = localStorage.getItem(configKey);
+                if (value) {
+                    try {
+                        modifiedConfigs[configKey] = JSON.parse(value);
+                        console.log('📝 Найдена активная конфигурация:', configKey);
+                    } catch (e) {
+                        console.warn(`Не удалось распарсить ${configKey}:`, e);
+                    }
+                } else {
+                    console.log('⚠️ Конфигурация ' + configKey + ' включена в availableConfigs, но не найдена в localStorage');
+                }
+            }
+        } else {
+            console.log('⚠️ GlobalConfigSettings или availableConfigs не найдены, экспортируем только базовые конфигурации');
+            // Если нет GlobalConfigSettings, экспортируем базовые конфигурации
+            const baseConfigs = ['baseConfig', 'financeConfig', 'ecommerceConfig', 'techConfig', 'educationConfig'];
+            for (const configKey of baseConfigs) {
+                const value = localStorage.getItem(configKey);
+                if (value) {
+                    try {
+                        modifiedConfigs[configKey] = JSON.parse(value);
+                        console.log('📝 Найдена базовая конфигурация:', configKey);
+                    } catch (e) {
+                        console.warn(`Не удалось распарсить ${configKey}:`, e);
+                    }
                 }
             }
         }
